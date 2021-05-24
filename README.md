@@ -1,2 +1,4 @@
 # token_tracker
-Track all the sh!t coins
+Track and trade all the coins
+
+*See individual scripts in the backend*
