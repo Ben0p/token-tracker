@@ -4,7 +4,7 @@ The idea was to back test different stop-loss and buy-stop values, while also co
 
 Data dumps are in the data folder, the result spreadsheets are in the results folder.
 
-The longer term day intervals produce better results. Unsure if this actually applies in the real world.
+The longer term DAY intervals produce better results. Unsure if this actually applies in the real world.
 
 #### BOT01
 - Trash, doesn't work.
@@ -17,7 +17,7 @@ The longer term day intervals produce better results. Unsure if this actually ap
   - Faster, less accurate 
 
 #### BOT04
-- Brute-force stop-loss and buy-stop margins
+- Brute-force stop-loss and buy-stop margins to whole percent accuracy
   - Slower, more accurate
 
 #### BOT05
@@ -28,4 +28,4 @@ The longer term day intervals produce better results. Unsure if this actually ap
 #### BOT06
 - Brute-force to two decimal places
   - Very slow, most accurate
-  - **ONLY USE FOR DAY DATA**
+  - Don't use, takes a prohibitively long time
