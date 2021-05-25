@@ -1,3 +1,5 @@
+# BOT Version 01
+
 ## Buy / Sell margin back testing scripts
 
 The idea was to back test different stop-loss and buy-stop values, while also considering the trading/swap fee.
