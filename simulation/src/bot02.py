@@ -1,18 +1,23 @@
 import random
 
 
+
+''' This script is for manual buy/sell margin percent back testing
+'''
+
+
 swap_fee = 1 # Swap fee percent
 
 
-with open('Binance_BNBUSDT_minute.csv', 'r') as f:
+with open('data\Binance_ETHUSDT_minute.csv', 'r') as f:
     l = list(f)
     f.close()
 
 
 track = []
 
-buy_margin =  7 # Percent increase to re-buy
-sell_margin =  7 # Percent drop to sell
+buy_margin = 62.21  # Percent increase to re-buy
+sell_margin = 36.60 # Percent drop to sell
 
 start_amount = 100
 bank = 0

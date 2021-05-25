@@ -1,14 +1,20 @@
-import random
+
+
+
+''' This script is for brute forcing buy/sell margin back testing
+    (Slower, more accurate)
+'''
+
 
 
 swap_fee = 1 # Swap fee percent
 
 
-with open('Binance_BTCUSDT_minute.csv', 'r') as f:
+with open('data\Binance_ETHUSDT_d.csv', 'r') as f:
     l = list(f)
     f.close()
 
-    record_balance = 0
+record_balance = 0
 
 for buy_margin in range(0,100):
     for sell_margin in range(0,100):

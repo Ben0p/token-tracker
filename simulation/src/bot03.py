@@ -1,10 +1,16 @@
 import random
 
 
+
+''' This script is for random buy/sell margin back testing
+    Faster (less accurate)
+'''
+
+
 swap_fee = 1 # Swap fee percent
 
 
-with open('Binance_XRPUSDT_minute.csv', 'r') as f:
+with open('data\Binance_ETHUSDT_d.csv', 'r') as f:
     l = list(f)
     f.close()
 

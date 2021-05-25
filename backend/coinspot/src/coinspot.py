@@ -14,11 +14,14 @@ import pytz
 
 
 '''
-    Performs some coinspot API requests and returns the responses
+    Performs coinspot API requests and returns the responses
 '''
 
 
-def connectDB():
+def connectDB() -> pymongo.MongoClient:
+    ''' Connects to a pymongo DB (specified in the env)
+        Returns the MongoClient connection object
+    '''
 
     username = urllib.parse.quote_plus(env.mongodb_user)
     password = urllib.parse.quote_plus(env.mongodb_pass)
@@ -33,12 +36,14 @@ def connectDB():
 def query(path: str, data: dict = False) -> list:
     ''' Creates, signs and posts the API request
         Returns dictionary response
+        path: The api endpoint path
+        data: A Dictionary of the data to POST
     '''
 
-    # Convert secret to bytes
+    # Convert secret to bytes (from the env file)
     secret = env.coinspot_secret.encode('utf-8')
 
-    # Construct the nonce
+    # Construct the nonce (unix time)
     nonce = int(time.time()*1000000)
     postdata = {
         'nonce' :  nonce
@@ -61,7 +66,7 @@ def query(path: str, data: dict = False) -> list:
     headers['key'] = env.coinspot_key
     headers['sign'] = signedMessage
 
-    # Coinspot url
+    # Coinspot base url
     endpoint = "www.coinspot.com.au"
 
     # Create connection
@@ -98,7 +103,6 @@ def getBalances(db: pymongo.MongoClient) -> Tuple:
     path = '/api/v2/ro/my/balances'
     response = query(path)
 
-
     if response['status'] == 'ok':
         for balance in response['balances']:
             for key in balance:
@@ -118,6 +122,8 @@ def getBalances(db: pymongo.MongoClient) -> Tuple:
 
 
 def buyQuotes(db: pymongo.MongoClient) -> None:
+    ''' Get
+    ''' 
 
     coins = db['coinspot_coins'].find()
 
@@ -191,6 +197,7 @@ def swapQuotes(db: pymongo.MongoClient) -> None:
             )
 
             print(f"{coin['symbol']}:USDT - {response['rate']}")
+
 
 def calcSplit(db: pymongo.MongoClient) -> None:
 

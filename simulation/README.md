@@ -1,10 +1,10 @@
-## These bots are currently TRASH
+## Buy / Sell margin back testing scripts
 
-The idea was to automatically adjust the stop-loss and buy-stop values, while also considering the trading/swap fee.
-
-TL;DR it worked out that the most efficient strategy is to HODL the entire time. 
+The idea was to back test different stop-loss and buy-stop values, while also considering the trading/swap fee.
 
 Data dumps are in the data folder, the result spreadsheets are in the results folder.
+
+The longer term day intervals produce better results. Unsure if this actually applies in the real world.
 
 #### BOT01
 - Trash, doesn't work.
@@ -14,6 +14,18 @@ Data dumps are in the data folder, the result spreadsheets are in the results fo
 
 #### BOT03
 - Random stop-loss and buy-stop margins
+  - Faster, less accurate 
 
-#### BOT02
+#### BOT04
 - Brute-force stop-loss and buy-stop margins
+  - Slower, more accurate
+
+#### BOT05
+- Brute-force from a specific date with a specific amount, simulate real world position
+  - Doesn't really work logically because it performs actions that would not have been done
+  - e.g. it might sell 1 day after your buy position but you have held IRL
+
+#### BOT06
+- Brute-force to two decimal places
+  - Very slow, most accurate
+  - **ONLY USE FOR DAY DATA**

@@ -1,8 +1,10 @@
-
-
 import time
 import random
 
+
+
+''' Don't use this script, it is trash and doesn't work. Logic is broken. 
+'''
 
 
 
