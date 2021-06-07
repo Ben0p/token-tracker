@@ -3,14 +3,37 @@ from env import env
 import requests
 import time
 import json
+import pymongo
+import urllib
+from datetime import datetime
+import pytz
 
 
 
-def getBSCTokens(address: str) -> list:
+def connectDB() -> pymongo.MongoClient:
+    ''' Connects to a pymongo DB (specified in the env)
+        Returns the MongoClient connection object
+    '''
+
+    username = urllib.parse.quote_plus(env.mongodb_user)
+    password = urllib.parse.quote_plus(env.mongodb_pass)
+
+    client = pymongo.MongoClient(f'mongodb://{username}:{password}@{env.mongodb_host}:{env.mongodb_port}')
+
+    db = client[env.mongodb_db]
+
+    return(db)
+
+
+def getBSCTokens(address: str, DB: pymongo.MongoClient) -> None:
     ''' Input BSC wallet address <str>
         Returns a list of BNC tokens held in wallet <list>
         Uses free bitquery API (10 per minute)
     '''
+
+    print('##############')
+    print('# BSC Tokens #')
+    print('##############')
 
     # GraphQL Query
     query = f'''{{ethereum(network: bsc) {{
@@ -40,15 +63,34 @@ def getBSCTokens(address: str) -> list:
             time.sleep(10)
     
     tokens = tokens['data']['ethereum']['address'][0]['balances']
+    # Append timestamp
+    timestamp = datetime.now()
+    timestamp = timestamp.replace(tzinfo=pytz.timezone(env.tz))
 
-    return(tokens)
+    for token in tokens:
+
+        DB['bsc_balances'].insert_one(
+            {
+                'symbol' : token['currency']['symbol'],
+                'address' : token['currency']['address'],
+                'decimals' : token['currency']['decimals'],
+                'name' : token['currency']['name'],
+                'value' : token['value'],
+                'timestamp' : timestamp
+            }
+        )
+        print(f"{token['currency']['symbol']} : {token['value']}")
 
 
-def getETHTokens(address: str) -> list:
+def getETHTokens(address: str, DB: pymongo.MongoClient) -> list:
     ''' Input ETH wallet address <str>
         Returns a list of ETH tokens held in wallet <list>
         Uses free bitquery API (10 per minute)
     '''
+
+    print('##############')
+    print('# ETH Tokens #')
+    print('##############')
 
     # GraphQL Query
     query = f'''{{ethereum(network: ethereum) {{
@@ -77,8 +119,23 @@ def getETHTokens(address: str) -> list:
             time.sleep(10)
     
     tokens = tokens['data']['ethereum']['address'][0]['balances']
+    # Append timestamp
+    timestamp = datetime.now()
+    timestamp = timestamp.replace(tzinfo=pytz.timezone(env.tz))
 
-    return(tokens)
+    for token in tokens:
+
+        DB['eth_balances'].insert_one(
+            {
+                'symbol' : token['currency']['symbol'],
+                'address' : token['currency']['address'],
+                'decimals' : token['currency']['decimals'],
+                'name' : token['currency']['name'],
+                'value' : token['value'],
+                'timestamp' : timestamp
+            }
+        )
+        print(f"{token['currency']['symbol']} : {token['value']}")
 
 
 def getWBNBHoldings(address: str):
@@ -117,22 +174,23 @@ def getWBNBHoldings(address: str):
     return(tokens['data']['ethereum']['address'][0]['balances'][0]['value'])
 
 
+def run():
+    '''
+    '''
+
+    while True:
+
+        DB = connectDB()
+
+        while True:
+            getBSCTokens(env.bsc_wallet, DB)
+            getETHTokens(env.bsc_wallet, DB)
+
+            print(f"Sleeping {env.interval} seconds.")
+            time.sleep(env.interval)
+
 
 
 if __name__ == "__main__":
 
-    '''
-    # Test
-    bsc_tokens = getBSCTokens(env.bsc_wallet)
-    eth_tokens = getETHTokens(env.bsc_wallet)
-
-    tokens = bsc_tokens + eth_tokens
-
-    for token in tokens:
-        print(token)
-    '''
-
-    mars_holdings = getWBNBHoldings('0xbD46105d4303d76617F3E1788648CB9486084533')
-
-    print(mars_holdings)
-   
+    run()

@@ -2,7 +2,7 @@ import numpy as np
 
 
 
-''' This script first does multiple sweeps at different accuracies
+''' This script does multiple sweeps at different accuracies
     First Sweep: Whole decimal points 0 - 100 %
     Second Sweep: One decimal point +- 10% of previous result
     Third Sweep: Two decimal points +- 5% of precious result

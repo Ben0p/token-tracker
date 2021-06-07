@@ -81,7 +81,12 @@ def query(path: str, data: dict = False) -> list:
 
     # Decode and convert json to dict then get the balances list
     response_data = response_data.decode("utf-8")
-    response_data = json.loads(response_data)
+    try:
+        response_data = json.loads(response_data)
+    except json.decoder.JSONDecodeError:
+        response_data = {
+            'status' : None
+        }
 
     # Append timestamp
     timestamp = datetime.now()
@@ -94,14 +99,18 @@ def query(path: str, data: dict = False) -> list:
     return(response_data)
 
 
-
 def getBalances(db: pymongo.MongoClient) -> Tuple:
     ''' Gets the CoinSpot balances (using the query function)
         Updates MongoDB with time stamps
     '''
+
+    print('############')
+    print('# Balances #')
+    print('############')
     
     path = '/api/v2/ro/my/balances'
     response = query(path)
+    total = 0
 
     if response['status'] == 'ok':
         for balance in response['balances']:
@@ -115,15 +124,17 @@ def getBalances(db: pymongo.MongoClient) -> Tuple:
                         'rate' : balance[key]['rate'],             
                     },
                 )
-        return(True, response['message'])
-
-    else:
-        return(False, response['message'])
+            total += balance[key]['balance']
+            print(f"{key}: ${balance[key]['audbalance']}")
 
 
 def buyQuotes(db: pymongo.MongoClient) -> None:
-    ''' Get
+    ''' Get quote for $AUD for each coin in DB
     ''' 
+
+    print('##############')
+    print('# Buy Quotes #')
+    print('##############')
 
     coins = db['coinspot_coins'].find()
 
@@ -146,10 +157,14 @@ def buyQuotes(db: pymongo.MongoClient) -> None:
                     'rate' : response['rate']
                 }
             )
-            #print(f"{coin['symbol']}: ${response['rate']}")
+            print(f"{coin['symbol']}: ${response['rate']}")
     
   
 def sellQuotes(db: pymongo.MongoClient) -> None:
+
+    print('###############')
+    print('# Sell Quotes #')
+    print('###############')
 
     coins = db['coinspot_coins'].find()
 
@@ -172,8 +187,16 @@ def sellQuotes(db: pymongo.MongoClient) -> None:
                 }
             )
 
+            print(f"{coin['symbol']}: ${response['rate']}")
+
 
 def swapQuotes(db: pymongo.MongoClient) -> None:
+    ''' Get swap quotes to USDT for coins in DB
+    '''
+
+    print('###############')
+    print('# Swap Quotes #')
+    print('###############')
 
     coins = db['coinspot_coins'].find()
 
@@ -200,6 +223,12 @@ def swapQuotes(db: pymongo.MongoClient) -> None:
 
 
 def calcSplit(db: pymongo.MongoClient) -> None:
+    ''' Calculates the difference between buy and  sell price
+    '''
+
+    print('##########')
+    print('# Splits #')
+    print('##########')
 
     coins = db['coinspot_coins'].find()
 
@@ -228,34 +257,29 @@ def calcSplit(db: pymongo.MongoClient) -> None:
         print(f"{coin['symbol']} split: {split}% (${split_aud})")
 
 
-
-
-if __name__ == "__main__":
-
-    db = connectDB()
-    #buyQuotes(db)
-    #sellQuotes(db)
-    #calcSplit(db)
-    swapQuotes(db)
-
+def run():
+    ''' Main run loop
     '''
+
     while True:
 
         db = connectDB()
 
         while True:
             try:
-                ############
-                # Balances #
-                ############
-                success, message = getBalances(db)
-                if success:
-                    print(f'Retrieved CoinSpot balances ({message})')
-                else:
-                    print(f'Error retriving CoinSpot balances ({message})')
+                getBalances(db)
+                buyQuotes(db)
+                sellQuotes(db)
+                swapQuotes(db)
+                calcSplit(db)
             
+                print(f"Done, sleeping {env.interval} seconds.")
                 time.sleep(env.interval)
             except pymongo.errors.ServerSelectionTimeoutError:
                 print("Lost connection to MongoDB")
                 break
-    '''
+
+
+if __name__ == "__main__":
+
+    run()

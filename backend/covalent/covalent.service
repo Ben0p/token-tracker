@@ -1,0 +1,12 @@
+#/lib/systemd/system
+
+[Unit]
+Description=Covalent
+After=multi-user.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 /usr/local/bin/covalent.py
+
+[Install]
+WantedBy=multi-user.target
