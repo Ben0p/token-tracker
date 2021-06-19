@@ -1,0 +1,12 @@
+#/lib/systemd/system
+
+[Unit]
+Description=coinspot
+After=multi-user.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 /usr/local/bin/coinspot.py
+
+[Install]
+WantedBy=multi-user.target

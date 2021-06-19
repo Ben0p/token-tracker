@@ -69,16 +69,29 @@ def getBSCTokens(address: str, DB: pymongo.MongoClient) -> None:
 
     for token in tokens:
 
+        DB['bsc_tokens'].find_one_and_update(
+            {
+                'address' : token['currency']['address'],
+            },
+            {
+                '$set' : {
+                    'address' : token['currency']['address'],
+                    'symbol' : token['currency']['symbol'],
+                    'decimals' : token['currency']['decimals'],
+                    'name' : token['currency']['name'],
+                },
+            },
+            upsert = True
+        )
+
         DB['bsc_balances'].insert_one(
             {
-                'symbol' : token['currency']['symbol'],
                 'address' : token['currency']['address'],
-                'decimals' : token['currency']['decimals'],
-                'name' : token['currency']['name'],
                 'value' : token['value'],
                 'timestamp' : timestamp
             }
         )
+
         print(f"{token['currency']['symbol']} : {token['value']}")
 
 
@@ -125,12 +138,24 @@ def getETHTokens(address: str, DB: pymongo.MongoClient) -> list:
 
     for token in tokens:
 
+        DB['eth_tokens'].find_one_and_update(
+            {
+                'address' : token['currency']['address'],
+            },
+            {
+                '$set' : {
+                    'address' : token['currency']['address'],
+                    'symbol' : token['currency']['symbol'],
+                    'decimals' : token['currency']['decimals'],
+                    'name' : token['currency']['name'],
+                },
+            },
+            upsert = True
+        )
+
         DB['eth_balances'].insert_one(
             {
-                'symbol' : token['currency']['symbol'],
                 'address' : token['currency']['address'],
-                'decimals' : token['currency']['decimals'],
-                'name' : token['currency']['name'],
                 'value' : token['value'],
                 'timestamp' : timestamp
             }
@@ -184,6 +209,7 @@ def run():
 
         while True:
             getBSCTokens(env.bsc_wallet, DB)
+            time.sleep(1)
             getETHTokens(env.bsc_wallet, DB)
 
             print(f"Sleeping {env.interval} seconds.")

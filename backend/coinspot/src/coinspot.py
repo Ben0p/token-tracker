@@ -1,4 +1,6 @@
-from typing import Tuple
+#!/usr/bin/python3
+#/usr/local/bin/
+
 from env import env
 
 import hmac
@@ -99,7 +101,7 @@ def query(path: str, data: dict = False) -> list:
     return(response_data)
 
 
-def getBalances(db: pymongo.MongoClient) -> Tuple:
+def getBalances(db: pymongo.MongoClient) -> tuple:
     ''' Gets the CoinSpot balances (using the query function)
         Updates MongoDB with time stamps
     '''

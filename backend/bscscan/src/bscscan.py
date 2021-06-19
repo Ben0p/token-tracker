@@ -21,6 +21,13 @@ def connectDB() -> pymongo.MongoClient:
     return(db)
 
 
+def writeLog(DB: pymongo.MongoClient, log: dict) -> None:
+    '''
+    '''
+
+    DB['log'].insert_one(log)
+
+
 def getBnbBalance(address: str, api_key: str, DB: pymongo.MongoClient) -> None:
     ''' address: Wallet address <str>
         api_key: BSCScan API key <str>
