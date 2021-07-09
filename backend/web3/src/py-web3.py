@@ -1,5 +1,4 @@
 from env import env
-import abis
 from web3 import Web3
 import urllib
 import pymongo
@@ -37,26 +36,60 @@ def get_eth_tokens(
     return(eth_tokens)
 
 
-def get_balances(
+def get_contract(
         web3: Web3,
-        tokens: list
+        token: dict
+    ):
+    '''Gets total supply of a token'''
+
+    checksum_address = Web3.toChecksumAddress(token['address'])
+    contract = web3.eth.contract(address=checksum_address, abi=token['abi'])
+
+    return(contract)
+
+
+def get_info(
+        contract,
+        token: dict
     ) -> dict:
-    '''Get ETH Balance'''
+    '''Gets info of a token contract'''
 
-    wei_balance = web3.eth.getBalance(env.eth_wallet)
-    eth_balance = web3.fromWei(wei_balance, 'ether')
+    if 'name' not in token:
+        # Get token name
+        token['name'] = contract.functions.name().call()
+        print(token['name'])
 
-    for token in tokens:
-        token_contract = web3.eth.contract(address=token['address'], abi=abis.abis[token['symbol']])
-        token_balance = token_contract.functions.balanceOf(env.eth_wallet).call()
-        print(token_balance)
+    if 'symbol' not in token:
+        # Get token symbol
+        token['symbol'] = contract.functions.symbol().call()
+    
+    if 'decimals' not in token:
+        # Get decimals
+        token['decimals'] = contract.functions.decimals().call()
 
-    balances = {
-        'wei' : wei_balance,
-        'eth' : eth_balance
-    }    
+    if 'supply' not in token:
+        # Get total supply
+        supply = contract.functions.totalSupply().call()
+        if token['decimals'] > 0:
+            supply = supply / (10**token['decimals'])
+        
+        token['supply'] = supply
+    
+    return(token)
 
-    return(balances)
+
+def get_balance(
+    contract,
+    wallet: str
+    ) -> float:
+    '''Get token balance of a wallet'''
+
+    # Find function by signature to handle overloading
+    balance_function = contract.get_function_by_signature('balanceOf(address)')
+    # Call function
+    balance = balance_function(wallet).call()
+
+    return(balance)
 
 
 def latest_block(web3: Web3) -> dict:
@@ -79,12 +112,16 @@ def run():
     # Get eth tokens from Mongo
     eth_tokens = get_eth_tokens(db)
 
-    # Balances
-    balances = get_balances(web3, eth_tokens)
-    print(f"ETH: {balances['eth']}")
+    for token in eth_tokens:
+        if token['address'] != '-':
+            contract = get_contract(web3, token)
+            token = get_info(contract, token)
 
-    # Block info
-    block = latest_block(web3)
+            balance = get_balance(contract, env.eth_wallet)
+            print(f"{token['name']} balance: {balance}")
+
+
+
 
 
 if __name__ == "__main__":

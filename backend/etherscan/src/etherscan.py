@@ -4,6 +4,7 @@ import requests
 import pymongo
 import urllib
 import time
+import json
 
 
 
@@ -39,8 +40,9 @@ def get_abi(
     request = f"https://api.etherscan.io/api?module=contract&action=getabi&address={token_address}&apikey={api_key}"
 
     response = requests.get(request)
+    response = response.json()
     
-    return(response.text)
+    return(response)
 
 
 def save_abi(
@@ -76,8 +78,9 @@ def run():
             for token in eth_tokens:
                 if 'abi' not in token and token['address'] != '-':
                     abi = get_abi(env.etherscan_key, token['address'])
-                    save_abi(db, abi, token['address'])
-                    print(f"Retrived {token['symbol']} contract ABI")
+                    if abi['message'] == 'OK':
+                        save_abi(db, abi['result'], token['address'])
+                        print(f"Retrived {token['symbol']} contract ABI")
             
 
             print(f"Sleep {env.interval} seconds")
